@@ -8,8 +8,8 @@ val DuoGreenShadow = Color(0xFF46A302)
 val DuoBlue = Color(0xFF1CB0F6)
 val DuoBlueShadow = Color(0xFF1899D6)
 
-val DuoOrange = Color(0xFFFFD600)
-val DuoOrangeShadow = Color(0xFFD6B200)
+val DuoYellow = Color(0xFFFFD600)
+val DuoYellowShadow = Color(0xFFD6B200)
 
 val DuoPurple = Color(0xFFB87BFF)
 val DuoPurpleShadow = Color(0xFF8A3FFF)

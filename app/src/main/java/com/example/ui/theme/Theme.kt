@@ -15,7 +15,7 @@ private val DarkColorScheme =
   darkColorScheme(
     primary = DuoGreen,
     secondary = DuoBlue,
-    tertiary = DuoOrange,
+    tertiary = DuoYellow,
     background = Color(0xFF121212),
     surface = Color(0xFF1E1E1E),
     onPrimary = Color.White,
@@ -28,7 +28,7 @@ private val LightColorScheme =
   lightColorScheme(
     primary = DuoGreen,
     secondary = DuoBlue,
-    tertiary = DuoOrange,
+    tertiary = DuoYellow,
     background = DuoLightGray,
     surface = Color.White,
     onPrimary = Color.White,

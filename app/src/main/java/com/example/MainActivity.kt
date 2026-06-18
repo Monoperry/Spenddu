@@ -40,9 +40,13 @@ import com.example.data.Expense
 import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.ExpenseViewModel
-import com.example.ui.viewmodel.GoogleUser
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.launch
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 class MainActivity : ComponentActivity() {
     private val viewModel: ExpenseViewModel by viewModels()
@@ -58,21 +62,21 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Category Configuration with emojis and Duo colors
+// Category Configuration with icons and Duo colors
 data class CategoryInfo(
     val name: String,
-    val emoji: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
     val color: Color,
     val shadowColor: Color
 )
 
 val Categories = listOf(
-    CategoryInfo("Food", "🍔", DuoOrange, DuoOrangeShadow),
-    CategoryInfo("Travel", "🛫", DuoBlue, DuoBlueShadow),
-    CategoryInfo("Shopping", "🛍️", DuoPurple, DuoPurpleShadow),
-    CategoryInfo("Entertainment", "🎮", DuoRed, DuoRedShadow),
-    CategoryInfo("Bills", "🧾", DuoGreen, DuoGreenShadow),
-    CategoryInfo("Other", "✨", Color(0xFF00D2C4), Color(0xFF009B90))
+    CategoryInfo("Food", Icons.Default.Fastfood, DuoYellow, DuoYellowShadow),
+    CategoryInfo("Travel", Icons.Default.FlightTakeoff, DuoBlue, DuoBlueShadow),
+    CategoryInfo("Shopping", Icons.Default.ShoppingBag, DuoPurple, DuoPurpleShadow),
+    CategoryInfo("Entertainment", Icons.Default.VideogameAsset, DuoRed, DuoRedShadow),
+    CategoryInfo("Bills", Icons.Default.Receipt, DuoGreen, DuoGreenShadow),
+    CategoryInfo("Other", Icons.Default.MoreHoriz, Color(0xFF00D2C4), Color(0xFF009B90))
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +84,6 @@ val Categories = listOf(
 fun MainAppScreen(viewModel: ExpenseViewModel) {
     val allExpenses by viewModel.allExpenses.collectAsStateWithLifecycle()
     val monthlyReports by viewModel.monthlyReports.collectAsStateWithLifecycle()
-    val userState by viewModel.userState.collectAsStateWithLifecycle()
     val isFirstLaunch by viewModel.isFirstLaunch.collectAsStateWithLifecycle()
     val selectedCurrency by viewModel.selectedCurrency.collectAsStateWithLifecycle()
     val dailyCap by viewModel.dailyCap.collectAsStateWithLifecycle()
@@ -89,6 +92,7 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
     var showAddSheet by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showSetCapDialog by remember { mutableStateOf(false) }
+    var showSuccessAnimation by remember { mutableStateOf(false) }
 
     // Startup daily cap warning alert
     var hasShownStartupWarning by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
@@ -120,7 +124,7 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = DuoLightGray,
+        containerColor = Color.White,
         topBar = {
             Box(
                 modifier = Modifier
@@ -159,34 +163,60 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
-                        // Logo icon with 3D shadow
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(DuoOrange, RoundedCornerShape(12.dp))
-                                .border(2.dp, DuoDarkGray, RoundedCornerShape(12.dp))
-                                .padding(4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("💸", fontSize = 20.sp)
-                        }
                         Text(
-                            text = "SPENDDU",
+                            text = "spend",
                             fontWeight = FontWeight.Black,
                             color = DuoDarkGray,
-                            fontSize = 20.sp,
-                            letterSpacing = (-0.5).sp
+                            fontSize = 32.sp,
+                            letterSpacing = (-1.5).sp
                         )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            text = "🦉",
-                            fontSize = 24.sp
-                        )
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.offset(y = (-2).dp)) {
+                            Text(
+                                text = "D",
+                                fontWeight = FontWeight.Black,
+                                color = DuoDarkGray,
+                                fontSize = 36.sp,
+                                style = androidx.compose.ui.text.TextStyle(
+                                    drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
+                                        miter = 10f,
+                                        width = 16f,
+                                        join = androidx.compose.ui.graphics.StrokeJoin.Round
+                                    )
+                                )
+                            )
+                            Text(
+                                text = "D",
+                                fontWeight = FontWeight.Black,
+                                color = DuoYellow,
+                                fontSize = 36.sp
+                            )
+                        }
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.offset(y = (-2).dp)) {
+                            Text(
+                                text = "o",
+                                fontWeight = FontWeight.Black,
+                                color = DuoDarkGray,
+                                fontSize = 36.sp,
+                                style = androidx.compose.ui.text.TextStyle(
+                                    drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
+                                        miter = 10f,
+                                        width = 16f,
+                                        join = androidx.compose.ui.graphics.StrokeJoin.Round
+                                    )
+                                )
+                            )
+                            Text(
+                                text = "o",
+                                fontWeight = FontWeight.Black,
+                                color = Color.White,
+                                fontSize = 36.sp
+                            )
+                        }
                     }
 
-                    // Google-avatar-style settings icon button
+                    // Settings icon button
                     Box(
                         modifier = Modifier
                             .size(42.dp)
@@ -195,25 +225,12 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
                             .clickable { showSettingsDialog = true },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (userState != null) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .background(DuoBlue)
-                                    .border(1.dp, DuoDarkGray, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = userState!!.name.take(1).uppercase(),
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 18.sp
-                                )
-                            }
-                        } else {
-                            Text("👤", fontSize = 20.sp)
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = DuoDarkGray,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             }
@@ -248,7 +265,13 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
                             text = "Add / Spend",
                             selected = selectedTab == "home",
                             onClick = { selectedTab = "home" },
-                            icon = { Text("➕", fontSize = 18.sp) }
+                            icon = { 
+                                Icon(
+                                    imageVector = Icons.Default.AddHome,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                ) 
+                            }
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -258,7 +281,13 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
                             text = "Report",
                             selected = selectedTab == "report",
                             onClick = { selectedTab = "report" },
-                            icon = { Text("📊", fontSize = 18.sp) }
+                            icon = { 
+                                Icon(
+                                    imageVector = Icons.Default.BarChart,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                ) 
+                            }
                         )
                     }
                 }
@@ -319,27 +348,28 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
                     containerColor = Color.White,
                     dragHandle = { BottomSheetDefaults.DragHandle(color = DuoBorderGray) },
                 ) {
+                    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
                     AddExpenseBottomSheetForm(
                         selectedCurrency = selectedCurrency,
+                        isLoading = isLoading,
                         onDismiss = { showAddSheet = false },
                         onSubmit = { amount, forWhat, paidTo, cat ->
-                            viewModel.addExpense(amount, forWhat, paidTo, cat, System.currentTimeMillis())
-                            showAddSheet = false
+                            viewModel.addExpense(amount, forWhat, paidTo, cat, System.currentTimeMillis()) {
+                                showAddSheet = false
+                                showSuccessAnimation = true
+                            }
                         }
                     )
                 }
             }
 
-            // Google Login Settings Dialog
+            // Auth & Settings Dialog
             if (showSettingsDialog) {
-                SettingsProfileDialog(
-                    userState = userState,
+                SettingsDialog(
                     selectedCurrency = selectedCurrency,
                     onCurrencyChange = { viewModel.setCurrency(it) },
                     dailyCap = dailyCap,
                     onDailyCapChange = { viewModel.setDailyCap(it) },
-                    onLoginWithGoogle = { name, email -> viewModel.loginWithGoogle(name, email) },
-                    onLogout = { viewModel.logout() },
                     onDismiss = { showSettingsDialog = false }
                 )
             }
@@ -371,10 +401,15 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
                                 .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("🦉", fontSize = 64.sp)
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = DuoRed,
+                                modifier = Modifier.size(64.dp)
+                            )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Duo Alert! ⚠️",
+                                text = "Over Cap Alert!",
                                 fontWeight = FontWeight.Black,
                                 fontSize = 24.sp,
                                 color = DuoRed
@@ -403,8 +438,45 @@ fun MainAppScreen(viewModel: ExpenseViewModel) {
                                 borderColor = DuoDarkGray,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("I'll Stay Strong! 💪", color = Color.White, fontWeight = FontWeight.Black)
+                                Text("I'll Stay Strong!", color = Color.White, fontWeight = FontWeight.Black)
                             }
+                        }
+                    }
+                }
+            }
+
+            // SUCCESS ANIMATION DIALOG
+            if (showSuccessAnimation) {
+                LaunchedEffect(Unit) {
+                    kotlinx.coroutines.delay(2000)
+                    showSuccessAnimation = false
+                }
+                androidx.compose.ui.window.Dialog(onDismissRequest = { showSuccessAnimation = false }) {
+                    Box(
+                        modifier = Modifier
+                            .size(250.dp)
+                            .background(Color.White, RoundedCornerShape(24.dp))
+                            .border(3.dp, DuoDarkGray, RoundedCornerShape(24.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Famous lottie success animation
+                        val composition by rememberLottieComposition(LottieCompositionSpec.Url("https://assets10.lottiefiles.com/packages/lf20_U1084s.json"))
+                        val progress by animateLottieCompositionAsState(
+                            composition,
+                            isPlaying = true,
+                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            LottieAnimation(
+                                composition = composition,
+                                progress = { progress },
+                                modifier = Modifier.size(150.dp)
+                            )
+                            Text(
+                                "Logged Successfully!",
+                                fontWeight = FontWeight.Bold,
+                                color = DuoGreen,
+                                fontSize = 18.sp
+                            )
                         }
                     }
                 }
@@ -440,53 +512,26 @@ fun HomeFeedSection(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // DUOLINGO OWL HERO PANEL
-        item {
-            val isOverCap = dailyCap > 0.0 && todaySpend > dailyCap
-            DuolingoCard(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (isOverCap) "🦉🚨" else "🦉",
-                        fontSize = 54.sp,
-                        modifier = Modifier.padding(end = 12.dp)
-                    )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Duo says:",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 14.sp,
-                            color = if (isOverCap) DuoRed else DuoGreen
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = if (allExpenses.isEmpty()) {
-                                "Tap below or open the menu to log your first spend! Let's build a streak!"
-                            } else if (isOverCap) {
-                                "Oh no! You crossed your daily cap! Put that wallet away and start saving! 📉"
-                            } else {
-                                "Great work tracking your expenses today! Keep your budget healthy! 🌟"
-                            },
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
-                            color = DuoDarkGray
-                        )
-                    }
-                }
-            }
-        }
-
         // DAILY SUMMARY / TODAY'S SPEND CARD
         item {
-            val isCapCrossed = dailyCap > 0.0 && todaySpend > dailyCap
+            val isCapReachedExactly = dailyCap > 0.0 && Math.abs(todaySpend - dailyCap) < 0.01
+            val isCapCrossed = dailyCap > 0.0 && todaySpend > dailyCap + 0.01
+
+            val cardBgColor = when {
+                isCapCrossed -> DuoRed
+                isCapReachedExactly -> DuoYellow
+                else -> DuoGreen
+            }
+            val cardShadowColor = when {
+                isCapCrossed -> DuoRedShadow
+                isCapReachedExactly -> DuoYellowShadow
+                else -> DuoGreenShadow
+            }
+
             DuolingoCard(
-                backgroundColor = if (isCapCrossed) DuoRed else DuoGreen,
+                backgroundColor = cardBgColor,
                 borderColor = DuoDarkGray,
-                shadowColor = if (isCapCrossed) DuoRedShadow else DuoGreenShadow,
+                shadowColor = cardShadowColor,
                 shadowDepth = 5.dp,
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -510,14 +555,18 @@ fun HomeFeedSection(
                         Text(
                             text = String.format(Locale.getDefault(), "%s%.2f", selectedCurrency, todaySpend),
                             color = Color.White,
-                            fontSize = 32.sp,
+                            fontSize = 44.sp,
                             fontWeight = FontWeight.Black
                         )
                         if (dailyCap > 0.0) {
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Cap limit: $selectedCurrency${String.format(Locale.getDefault(), "%.2f", dailyCap)}" + 
-                                       if (isCapCrossed) " ⚠️ OVER CAP!" else " (under control)",
+                                       when {
+                                           isCapCrossed -> " - OVER CAP"
+                                           isCapReachedExactly -> " - CAP REACHED"
+                                           else -> " (under control)"
+                                       },
                                 color = Color.White.copy(alpha = 0.9f),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp
@@ -534,7 +583,12 @@ fun HomeFeedSection(
                     }
                     
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(if (isCapCrossed) "🚨" else "🍔", fontSize = 32.sp)
+                        Icon(
+                            imageVector = if (isCapCrossed) Icons.Default.Warning else Icons.Default.TrendingDown,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         // Cute action button to customize cap
                         Row(
@@ -544,8 +598,15 @@ fun HomeFeedSection(
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.TrackChanges,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "🎯 Set Cap",
+                                text = "Set Cap",
                                 color = Color.White,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 11.sp
@@ -556,43 +617,7 @@ fun HomeFeedSection(
             }
         }
 
-        // TOTAL SPENT OVERALL PANEL
-        item {
-            DuolingoCard(
-                backgroundColor = Color.White,
-                borderColor = DuoDarkGray,
-                shadowColor = DuoShadowGray,
-                shadowDepth = 5.dp,
-                shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        Text(
-                            text = "TOTAL SPENT OVERALL",
-                            color = DuoDarkGray,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 12.sp,
-                            letterSpacing = 1.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = String.format(Locale.getDefault(), "%s%.2f", selectedCurrency, totalThisMonth),
-                            color = DuoGreen,
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Black
-                        )
-                    }
-                    Text("💰", fontSize = 42.sp)
-                }
-            }
-        }
+
 
         // TITLE FOR TRANSACTIONS FEED
         item {
@@ -614,7 +639,12 @@ fun HomeFeedSection(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("✨", fontSize = 48.sp)
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = DuoYellow,
+                            modifier = Modifier.size(48.dp)
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "No spends logged yet!",
@@ -629,7 +659,7 @@ fun HomeFeedSection(
                             shadowColor = DuoBlueShadow,
                             modifier = Modifier.width(180.dp)
                         ) {
-                            Text("Log Spent 🛒", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text("Log Spent", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -675,7 +705,12 @@ fun ExpenseItemCard(
                     .border(2.dp, category.shadowColor, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(category.emoji, fontSize = 24.sp)
+                Icon(
+                    imageVector = category.icon,
+                    contentDescription = category.name,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
             }
 
             Spacer(modifier = Modifier.width(14.dp))
@@ -786,7 +821,12 @@ fun ReportsSection(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("📉", fontSize = 54.sp)
+                        Icon(
+                            imageVector = Icons.Default.TrendingDown,
+                            contentDescription = null,
+                            tint = DuoBlue,
+                            modifier = Modifier.size(54.dp)
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "No report records yet!",
@@ -818,7 +858,12 @@ fun ReportsSection(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("📅", fontSize = 24.sp)
+                                    Icon(
+                                        imageVector = Icons.Default.CalendarMonth,
+                                        contentDescription = null,
+                                        tint = DuoDarkGray,
+                                        modifier = Modifier.size(24.dp)
+                                    )
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Column {
                                         Text(
@@ -912,10 +957,11 @@ fun ReportExpenseRowItem(
         // Info
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = category.emoji,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(end = 4.dp)
+                Icon(
+                    imageVector = category.icon,
+                    contentDescription = null,
+                    tint = category.color,
+                    modifier = Modifier.size(16.dp).padding(end = 4.dp)
                 )
                 Text(
                     text = expense.forWhat,
@@ -948,6 +994,7 @@ fun ReportExpenseRowItem(
 @Composable
 fun AddExpenseBottomSheetForm(
     selectedCurrency: String = "$",
+    isLoading: Boolean = false,
     onDismiss: () -> Unit,
     onSubmit: (amount: Double, forWhat: String, paidTo: String, category: String) -> Unit
 ) {
@@ -968,7 +1015,7 @@ fun AddExpenseBottomSheetForm(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "What was paid? 🦉",
+            text = "How much paid?",
             fontWeight = FontWeight.Black,
             fontSize = 22.sp,
             color = DuoDarkGray
@@ -1020,7 +1067,7 @@ fun AddExpenseBottomSheetForm(
         DuolingoTextField(
             value = forWhatStr,
             onValueChange = { forWhatStr = it },
-            placeholder = "e.g. Tasty pizza 🍕",
+            placeholder = "e.g. Tasty pizza",
             label = "Money spent for what?",
             testTag = "for_what_input"
         )
@@ -1056,8 +1103,8 @@ fun AddExpenseBottomSheetForm(
             items(Categories) { category ->
                 val isSelected = selectedCategory == category.name
                 val borderCol = DuoDarkGray
-                val shadowCol = if (isSelected) category.shadowColor else DuoShadowGray
-                val bgCol = if (isSelected) category.color else Color.White
+                val shadowCol = if (isSelected) DuoYellowShadow else DuoShadowGray
+                val bgCol = if (isSelected) DuoYellow else Color.White
 
                 DuolingoCard(
                     backgroundColor = bgCol,
@@ -1070,19 +1117,26 @@ fun AddExpenseBottomSheetForm(
                         selectedCategory = category.name
                         focusManager.clearFocus()
                     },
-                    modifier = Modifier.width(100.dp)
+                    modifier = Modifier.width(90.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                        modifier = Modifier.padding(horizontal = 2.dp, vertical = 2.dp)
                     ) {
-                        Text(category.emoji, fontSize = 24.sp)
+                        Icon(
+                            imageVector = category.icon,
+                            contentDescription = category.name,
+                            tint = if (isSelected) Color.White else DuoDarkGray,
+                            modifier = Modifier.size(24.dp)
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = category.name,
                             fontWeight = FontWeight.Black,
                             fontSize = 11.sp,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             color = if (isSelected) Color.White else DuoDarkGray
                         )
                     }
@@ -1100,34 +1154,39 @@ fun AddExpenseBottomSheetForm(
                 val amountValue = amountStr.toDoubleOrNull() ?: 0.0
                 onSubmit(amountValue, forWhatStr, paidToStr, selectedCategory)
             },
-            enabled = isValid,
+            enabled = isValid && !isLoading,
             backgroundColor = DuoGreen,
             shadowColor = DuoGreenShadow,
             modifier = Modifier.fillMaxWidth(),
             testTag = "submit_expense_button"
         ) {
-            Text(
-                text = "LOG SPENT! 🚀",
-                fontWeight = FontWeight.Black,
-                fontSize = 16.sp,
-                color = Color.White
-            )
+            if (isLoading) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 3.dp
+                )
+            } else {
+                Text(
+                    text = "LOG SPENT",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 16.sp,
+                    color = Color.White
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
-// GOOGLE SIGN-IN INTERACTION SYSTEM (In Settings dialog)
+// LOCAL PROFILE INTERACTION SYSTEM (In Settings dialog)
 @Composable
-fun SettingsProfileDialog(
-    userState: GoogleUser?,
+fun SettingsDialog(
     selectedCurrency: String,
     onCurrencyChange: (String) -> Unit,
     dailyCap: Double,
     onDailyCapChange: (Double) -> Unit,
-    onLoginWithGoogle: (String, String) -> Unit,
-    onLogout: () -> Unit,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -1151,7 +1210,7 @@ fun SettingsProfileDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "App Settings ⚙️",
+                        text = "App Settings",
                         fontWeight = FontWeight.Black,
                         fontSize = 20.sp,
                         color = DuoDarkGray
@@ -1163,108 +1222,27 @@ fun SettingsProfileDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if (userState != null) {
-                    // Logged in Screen User Details Panel
-                    Box(
-                        modifier = Modifier
-                            .size(70.dp)
-                            .background(DuoBlue, CircleShape)
-                            .border(3.dp, DuoBlueShadow, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = userState.name.take(1).uppercase(),
-                            color = Color.White,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 28.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Hello, ${userState.name}! 👋",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 16.sp,
-                        color = DuoDarkGray
-                    )
-                    Text(
-                        text = userState.email,
-                        fontSize = 11.sp,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    // Backup Card
-                    DuolingoCard(
-                        backgroundColor = DuoLightGray,
-                        borderColor = DuoBorderGray,
-                        shadowColor = DuoShadowGray,
-                        borderWidth = 1.dp,
-                        shadowDepth = 2.dp,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("☁️ Google Cloud Sync Active", fontWeight = FontWeight.Bold, color = DuoGreen, fontSize = 12.sp)
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text("Database status: Backed up 100%", fontSize = 10.sp, color = Color.Gray)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    DuolingoButton(
-                        onClick = onLogout,
-                        backgroundColor = DuoRed,
-                        shadowColor = DuoRedShadow,
-                        modifier = Modifier.fillMaxWidth().height(36.dp)
-                    ) {
-                        Text("Log Out Google Account", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
-                    }
-                } else {
-                    // Google Sign-In Banner
-                    Text(
-                        text = "Sync & Save Your Streaks!",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 16.sp,
-                        color = DuoDarkGray,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "Sign in to backup your daily spending and preserve your budget habits across Google devices.",
-                        fontSize = 11.sp,
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // GOOGLE SIGN IN BUTTON
-                    DuolingoButton(
-                        onClick = {
-                            // Perfect mock sign in info
-                            onLoginWithGoogle("Friendly Tracker", "mrincognitohi5@gmail.com")
-                        },
-                        backgroundColor = Color.White,
-                        borderColor = DuoBorderGray,
-                        shadowColor = DuoShadowGray,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, DuoBorderGray, RoundedCornerShape(16.dp))
-                    ) {
+                // Backup Card
+                DuolingoCard(
+                    backgroundColor = DuoLightGray,
+                    borderColor = DuoBorderGray,
+                    shadowColor = DuoShadowGray,
+                    borderWidth = 1.dp,
+                    shadowDepth = 2.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("💬 ", fontSize = 16.sp) // Cute prompt icon
-                            Text(
-                                text = "Sign in with Google",
-                                color = DuoDarkGray,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 14.sp
+                            Icon(
+                                imageVector = Icons.Default.Save,
+                                contentDescription = null,
+                                tint = DuoGreen,
+                                modifier = Modifier.size(16.dp).padding(end = 4.dp)
                             )
+                            Text("Local Save Active", fontWeight = FontWeight.Bold, color = DuoGreen, fontSize = 12.sp)
                         }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text("Database status: Stored on device only", fontSize = 10.sp, color = Color.Gray)
                     }
                 }
 
@@ -1274,7 +1252,7 @@ fun SettingsProfileDialog(
 
                 // CURRENCY SELECTOR
                 Text(
-                    text = "SELECT CURRENCY 🌍",
+                    text = "SELECT CURRENCY",
                     fontWeight = FontWeight.Black,
                     fontSize = 12.sp,
                     color = DuoDarkGray,
@@ -1314,7 +1292,7 @@ fun SettingsProfileDialog(
 
                 // CHOSEN DAILY BUDGET CAP
                 Text(
-                    text = "DAILY SPENDING LIMIT 🎯",
+                    text = "DAILY SPENDING LIMIT",
                     fontWeight = FontWeight.Black,
                     fontSize = 12.sp,
                     color = DuoDarkGray,
@@ -1419,7 +1397,7 @@ fun SettingsProfileDialog(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Crafted with cartoon 💖 in Jetpack Compose",
+                    text = "Crafted beautifully in Jetpack Compose",
                     fontSize = 9.sp,
                     color = Color.Gray
                 )
@@ -1452,7 +1430,12 @@ fun SetDailyCapDialog(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("🎯", fontSize = 54.sp)
+                Icon(
+                    imageVector = Icons.Default.TrackChanges,
+                    contentDescription = null,
+                    tint = DuoDarkGray,
+                    modifier = Modifier.size(54.dp)
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Daily Spending Cap",

@@ -46,7 +46,8 @@ fun DuolingoCard(
     Box(
         modifier = modifier
             .then(clickModifier)
-            .padding(bottom = shadowDepth)
+            .padding(bottom = shadowDepth),
+        propagateMinConstraints = true
     ) {
         // Shadow Layer (placed underneath, shifted down)
         Box(
@@ -100,7 +101,10 @@ fun DuolingoButton(
         )
         .padding(bottom = shadowDepth)
 
-    Box(modifier = customModifier) {
+    Box(
+        modifier = customModifier,
+        propagateMinConstraints = true
+    ) {
         // Shadow Layer (Always fixed at bottom)
         Box(
             modifier = Modifier

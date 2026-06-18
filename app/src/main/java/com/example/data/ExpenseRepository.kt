@@ -3,7 +3,9 @@ package com.example.data
 import kotlinx.coroutines.flow.Flow
 
 class ExpenseRepository(private val expenseDao: ExpenseDao) {
-    val allExpenses: Flow<List<Expense>> = expenseDao.getAllExpenses()
+    fun getAllExpensesForUser(userEmail: String): Flow<List<Expense>> {
+        return expenseDao.getAllExpenses(userEmail)
+    }
 
     suspend fun insert(expense: Expense) {
         expenseDao.insertExpense(expense)
