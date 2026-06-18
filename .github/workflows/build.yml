@@ -26,10 +26,11 @@ jobs:
         with:
           gradle-version: 9.3.1
 
-      - name: Disable built-in Kotlin for KSP compatibility
+      - name: Disable AGP 9.0 built-in mode for KSP compatibility
         run: |
           echo "android.builtInKotlin=false" >> gradle.properties
           echo "android.newDsl=false" >> gradle.properties
+          echo "android.enableLegacyVariantApi=true" >> gradle.properties
 
       - name: Build Debug APK
         run: gradle assembleDebug --stacktrace
