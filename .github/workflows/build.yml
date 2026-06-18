@@ -26,9 +26,13 @@ jobs:
         with:
           gradle-version: 9.3.1
 
+      - name: Disable built-in Kotlin for KSP compatibility
+        run: |
+          echo "android.builtInKotlin=false" >> gradle.properties
+          echo "android.newDsl=false" >> gradle.properties
+
       - name: Build Debug APK
         run: gradle assembleDebug --stacktrace
-        # Note: using 'gradle' not './gradlew' since we're using the action-installed version
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
